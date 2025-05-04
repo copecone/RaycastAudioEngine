@@ -3,8 +3,8 @@ plugins {
     alias(libs.plugins.kotlinxSerialization)
 }
 
-group = "me.user"
-version = "1.0-SNAPSHOT"
+group = "io.github.copecone"
+version = "0.0.1-INDEV"
 
 repositories {
     mavenCentral()
@@ -23,11 +23,22 @@ kotlin {
         else -> throw GradleException("Host OS is not supported in Kotlin/Native.")
     }
 
-    nativeTarget.apply {
-        binaries {
-            executable {
-                entryPoint = "main"
+    mingwX64("native") {
+        compilations.getByName("main") {
+            cinterops {
+                val openal by creating {
+                    defFile("src/nativeInterop/cinterop/openal.def")
+                    packageName("openal")
+                }
             }
+        }
+
+        val openALPath = "C:/Program Files (x86)/OpenAL 1.1 SDK/libs/Win64"
+        binaries.executable {
+            entryPoint = "$group.raycastaudioengine.main"
+
+            linkerOpts.add("-L${openALPath}")
+            linkerOpts.add("-lOpenAL32")
         }
     }
 
